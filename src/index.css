@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  outline: none;
+}
+
+/* Custom CSS to render Block References in the gutter */
+.ProseMirror [data-block-refs] {
+  position: relative;
+}
+
+.ProseMirror [data-block-refs]::after {
+  content: "Refs: " attr(data-block-refs);
+  position: absolute;
+  right: -80px; /* Positioned in the right gutter */
+  top: 0;
+  width: 70px;
+  font-size: 10px;
+  color: #3b82f6; /* text-blue-500 */
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  background-color: #eff6ff; /* bg-blue-50 */
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #bfdbfe; /* border-blue-200 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  /* The JSON string from attr() will look like ["ref_1"]. We could clean it up more with JS, but this proves the concept. */
+}
+
+/* Make sure the main app takes up the full screen correctly */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* App layout handles scroll */
+}
+
+/* Table of Contents dots */
+div[data-type="toc"] {
+  width: 100%;
+}

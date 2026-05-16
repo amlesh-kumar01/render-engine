@@ -8,6 +8,7 @@ export function convertBackendToTipTap(backendData) {
       textAlign: block.alignment || 'left',
       blockRefs: block.refs || [],
       marginBottom: block.marginBottom || '16px',
+      lineNumber: block.line_number || null,
     };
 
     switch (block.type) {
@@ -27,23 +28,67 @@ export function convertBackendToTipTap(backendData) {
 
       case 'LIST': {
         const isBullet = block.list_type === 'bullet';
+        const listType = isBullet ? 'bulletList' : 'orderedList';
         
-        // This is a simplified list conversion. Real-world would need 
-        // recursive processing for nested levels. For now we output flat items 
-        // into the main list, and rely on indent classes, or structure them nested.
-        return {
-          type: isBullet ? 'bulletList' : 'orderedList',
-          attrs,
-          content: block.items.map(item => ({
-            type: 'listItem',
-            attrs: { level: item.level || 0, blockRefs: item.refs || [] },
-            content: [
-              {
-                type: 'paragraph',
-                content: convertSpansToTipTapNodes(item.spans),
+        const buildNestedList = (items, startIdx = 0, currentLevel = 0) => {
+          const content = [];
+          let i = startIdx;
+
+          while (i < items.length) {
+            const item = items[i];
+            
+            if (item.level < currentLevel) {
+              break;
+            } else if (item.level === currentLevel) {
+              const listItem = {
+                type: 'listItem',
+                attrs: { blockRefs: item.refs || [] },
+                content: [
+                  {
+                    type: 'paragraph',
+                    content: convertSpansToTipTapNodes(item.spans),
+                  }
+                ]
+              };
+              
+              if (i + 1 < items.length && items[i + 1].level > currentLevel) {
+                const childResult = buildNestedList(items, i + 1, currentLevel + 1);
+                listItem.content.push({
+                  type: listType,
+                  content: childResult.content
+                });
+                i = childResult.nextIdx;
+              } else {
+                i++;
               }
-            ]
-          }))
+              content.push(listItem);
+            } else {
+              // If skipped levels (e.g. 0 to 2), treat as next level
+              const childResult = buildNestedList(items, i, currentLevel + 1);
+              // append to previous item if possible
+              if (content.length > 0) {
+                 content[content.length - 1].content.push({
+                   type: listType,
+                   content: childResult.content
+                 });
+              } else {
+                 content.push({
+                   type: 'listItem',
+                   content: [ { type: listType, content: childResult.content } ]
+                 });
+              }
+              i = childResult.nextIdx;
+            }
+          }
+          return { content, nextIdx: i };
+        };
+
+        const { content } = buildNestedList(block.items, 0, 0);
+
+        return {
+          type: listType,
+          attrs,
+          content
         };
       }
 

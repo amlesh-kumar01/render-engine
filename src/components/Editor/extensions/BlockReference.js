@@ -24,14 +24,22 @@ export const BlockReference = Extension.create({
             },
           },
           marginBottom: {
-            default: '16px',
-            parseHTML: element => element.style.marginBottom || '16px',
+            default: null, // Don't default to 16px to avoid spacing out list items
+            parseHTML: element => element.style.marginBottom || null,
             renderHTML: attributes => {
               if (!attributes.marginBottom) return {};
               return {
                 style: `margin-bottom: ${attributes.marginBottom}`,
               };
             },
+          },
+          lineNumber: {
+            default: null,
+            parseHTML: element => element.getAttribute('data-line-number'),
+            renderHTML: attributes => {
+              if (!attributes.lineNumber) return {};
+              return { 'data-line-number': attributes.lineNumber };
+            }
           },
           id: {
             default: null,

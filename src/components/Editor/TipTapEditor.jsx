@@ -64,7 +64,7 @@ const TipTapEditor = ({ initialBackendData }) => {
   });
 
   return (
-    <EditorA4Container editor={editor}>
+    <EditorA4Container editor={editor} metadata={initialBackendData.metadata}>
       <EditorContent editor={editor} />
     </EditorA4Container>
   );

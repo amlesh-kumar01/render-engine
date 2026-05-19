@@ -106,6 +106,29 @@ export function convertBackendToTipTap(backendData) {
           attrs: { ...attrs, entries: block.entries },
         };
 
+      case 'TABLE':
+        return {
+          type: 'table',
+          attrs,
+          content: (block.rows || []).map(row => ({
+            type: 'tableRow',
+            content: (row.cells || []).map(cell => ({
+              type: cell.isHeader ? 'tableHeader' : 'tableCell',
+              attrs: {
+                colspan: cell.colspan || 1,
+                rowspan: cell.rowspan || 1,
+                colwidth: cell.colwidth || null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                  content: convertSpansToTipTapNodes(cell.spans),
+                }
+              ]
+            }))
+          }))
+        };
+
       default:
         return { type: 'paragraph', attrs, content: [] };
     }

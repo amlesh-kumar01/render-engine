@@ -45,6 +45,32 @@
 
 /* We removed CSS-based line numbering because it's now handled by the React LineNumbersGutter component */
 
+/* Table styles matching the PDF aesthetic */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  table-layout: auto;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid black;
+  padding: 0.5rem;
+  vertical-align: top;
+}
+
+.ProseMirror table th {
+  border-bottom: 2px solid black;
+  text-align: left;
+  font-weight: bold;
+}
+
+.ProseMirror table p {
+  margin: 0;
+}
+
 /* Make sure the main app takes up the full screen correctly */
 html, body, #root {
   height: 100%;

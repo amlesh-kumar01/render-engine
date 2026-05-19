@@ -3,6 +3,10 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import ListItem from '@tiptap/extension-list-item';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 import debounce from 'lodash.debounce';
 
 import { CitationNode } from './extensions/CitationNode';
@@ -50,6 +54,12 @@ const TipTapEditor = ({ initialBackendData }) => {
       CitationNode,
       BlockReference,
       TocNode,
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: initialContent,
     onUpdate: ({ editor }) => {

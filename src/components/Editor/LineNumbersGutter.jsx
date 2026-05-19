@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-const LineNumbersGutter = ({ editor, startNumber = 165 }) => {
+const LineNumbersGutter = ({ editor, startNumber = 1}) => {
   const [lineData, setLineData] = useState([]);
   const containerRef = useRef(null);
 
@@ -19,6 +19,9 @@ const LineNumbersGutter = ({ editor, startNumber = 165 }) => {
       const containerRect = containerRef.current.getBoundingClientRect();
 
       blocks.forEach(block => {
+        // Skip blocks inside tables as per PDF behavior
+        if (block.closest('table')) return;
+
         // Skip empty paragraphs if they don't contain visual text, unless they take up space
         // We will just number any block that has height
         const blockRect = block.getBoundingClientRect();

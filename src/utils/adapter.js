@@ -2,7 +2,11 @@
 export function convertBackendToTipTap(backendData) {
   if (!backendData || !backendData.blocks) return { type: 'doc', content: [] };
 
-  const content = backendData.blocks.map(block => {
+  const pages = [];
+  let currentPageBlocks = [];
+  let pageNumber = 1;
+
+  const convertBlock = (block) => {
     const attrs = {
       id: block.id,
       textAlign: block.alignment || 'left',
@@ -15,7 +19,7 @@ export function convertBackendToTipTap(backendData) {
       case 'HEADING':
         return {
           type: 'heading',
-          attrs: { ...attrs, level: block.level || 1 },
+          attrs: { ...attrs, level: parseInt(block.level) || 1 },
           content: convertSpansToTipTapNodes(block.spans),
         };
 
@@ -63,9 +67,7 @@ export function convertBackendToTipTap(backendData) {
               }
               content.push(listItem);
             } else {
-              // If skipped levels (e.g. 0 to 2), treat as next level
               const childResult = buildNestedList(items, i, currentLevel + 1);
-              // append to previous item if possible
               if (content.length > 0) {
                  content[content.length - 1].content.push({
                    type: listType,
@@ -99,8 +101,6 @@ export function convertBackendToTipTap(backendData) {
         };
 
       case 'TOC':
-        // TipTap doesn't have a native TOC block that handles complex logic out of the box,
-        // we map it to a custom node type.
         return {
           type: 'toc',
           attrs: { ...attrs, entries: block.entries },
@@ -132,9 +132,38 @@ export function convertBackendToTipTap(backendData) {
       default:
         return { type: 'paragraph', attrs, content: [] };
     }
+  };
+
+  backendData.blocks.forEach(block => {
+    if (block.type === 'PAGE_BREAK') {
+      if (currentPageBlocks.length > 0) {
+        pages.push({
+          type: 'page',
+          attrs: { pageNumber },
+          content: currentPageBlocks
+        });
+        pageNumber++;
+        currentPageBlocks = [];
+      }
+    } else {
+      currentPageBlocks.push(convertBlock(block));
+    }
   });
 
-  return { type: 'doc', content };
+  if (currentPageBlocks.length > 0) {
+    pages.push({
+      type: 'page',
+      attrs: { pageNumber },
+      content: currentPageBlocks
+    });
+  }
+
+  // Update total pages for all page nodes
+  pages.forEach(page => {
+    page.attrs.totalPages = pages.length;
+  });
+
+  return { type: 'doc', content: pages };
 }
 
 // Convert spans (inline text with styling/refs) to TipTap text/citation nodes
@@ -148,6 +177,7 @@ function convertSpansToTipTapNodes(spans) {
     if (span.bold) marks.push({ type: 'bold' });
     if (span.italic) marks.push({ type: 'italic' });
     if (span.underline) marks.push({ type: 'underline' });
+    if (span.fontSize) marks.push({ type: 'fontSize', attrs: { size: span.fontSize } });
     
     // Add the text node
     if (span.text) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-const LineNumbersGutter = ({ editor, startNumber = 1}) => {
+const LineNumbersGutter = ({ editor, startNumber = 1, scopedNodeId }) => {
   const [lineData, setLineData] = useState([]);
   const containerRef = useRef(null);
 
@@ -13,9 +13,14 @@ const LineNumbersGutter = ({ editor, startNumber = 1}) => {
       const newLines = [];
       let currentNumber = startNumber;
       
-      // Get all text-containing block elements and the TOC container itself
-      const blocks = editorDom.querySelectorAll('p, h1, h2, h3, h4, h5, h6, .toc-container');
       if (!containerRef.current) return;
+      
+      // If we have a scoped DOM node (the page), only query inside it
+      // The parent of the containerRef is the flex container, its parent is the NodeViewWrapper.
+      const pageNode = containerRef.current.closest('[data-type="page"]') || editorDom;
+      
+      // Get all text-containing block elements and the TOC container itself within THIS page
+      const blocks = pageNode.querySelectorAll('p, h1, h2, h3, h4, h5, h6, .toc-container');
       const containerRect = containerRef.current.getBoundingClientRect();
 
       blocks.forEach(block => {

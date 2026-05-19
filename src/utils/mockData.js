@@ -15,13 +15,14 @@ export const godPayload = {
       "level": "3",
       "alignment": "center",
       "marginBottom": "1px",
-      "spans": [{ "text": "David W. Burns", "bold": true }]
+      "spans": [{ "text": "David W. Burns", "bold": true,"fontSize": "14pt" }]
     },
     {
       "id": "blk_evaluator_2",
       "type": "PARAGRAPH",
       "alignment": "center",
       "marginBottom": "1px",
+      "size":"101px",
       "spans": [{ "text": "ND DC FACFN FABBIR", "bold": true }]
     },
     {
@@ -98,7 +99,7 @@ export const godPayload = {
       "level": 2,
       "alignment": "center",
       "marginBottom": "24px",
-      "spans": [{ "text": "INTRODUCTION", "bold": true }]
+      "spans": [{ "text": "INTRODUCTION", "bold": true, fontSize:"14pt"}]
     },
     {
       "id": "blk_intro_p1",
@@ -121,6 +122,10 @@ export const godPayload = {
       ]
     },
     {
+      "id": "blk_page_break_1",
+      "type": "PAGE_BREAK"
+    },
+    {
       "id": "blk_toc",
       "type": "TOC",
       "marginBottom": "32px",
@@ -134,15 +139,19 @@ export const godPayload = {
       ]
     },
     {
-      "id": "blk_para",
+      "id": "blk_2",
       "type": "PARAGRAPH",
       "marginBottom": "24px",
-      "line_number": 2122,
+      "line_number": 2165,
       "spans": [
         { "text": "This is a comprehensive test document demonstrating all block types. Here is an inline citation: " },
-        { "text": "[1]", "bold": true, "refs": ["ref_1"] },
-        { "text": "." }
+        { "text": "[1]", "refs": ["ref_1"] },
+        { "text": "."}
       ]
+    },
+    {
+      "id": "blk_page_break_2",
+      "type": "PAGE_BREAK"
     },
     {
       "id": "blk_list",

@@ -12,8 +12,15 @@ import debounce from 'lodash.debounce';
 import { CitationNode } from './extensions/CitationNode';
 import { BlockReference } from './extensions/BlockReference';
 import { TocNode } from './extensions/TocNode';
-import EditorA4Container from './EditorA4Container';
+import { PageExtension } from './extensions/PageExtension';
+import { FontSize } from './extensions/FontSize';
+import Document from '@tiptap/extension-document';
 import { convertBackendToTipTap, convertTipTapToBackend } from '../../utils/adapter';
+
+// Custom Document that requires at least one Page node, which contains the actual blocks
+const CustomDocument = Document.extend({
+  content: 'page+',
+});
 
 const TipTapEditor = ({ initialBackendData }) => {
   // 1. Adapter: Convert Backend JSON to TipTap JSON on load
@@ -43,10 +50,14 @@ const TipTapEditor = ({ initialBackendData }) => {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
+        document: false, // We provide our own CustomDocument
         heading: {
           levels: [1, 2, 3, 4, 5, 6],
         },
       }),
+      CustomDocument,
+      PageExtension,
+      FontSize,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -74,9 +85,9 @@ const TipTapEditor = ({ initialBackendData }) => {
   });
 
   return (
-    <EditorA4Container editor={editor} metadata={initialBackendData.metadata}>
+    <div className="bg-transparent w-full h-full pb-16">
       <EditorContent editor={editor} />
-    </EditorA4Container>
+    </div>
   );
 };
 

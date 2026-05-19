@@ -13,14 +13,16 @@ const LineNumbersGutter = ({ editor, startNumber = 1}) => {
       const newLines = [];
       let currentNumber = startNumber;
       
-      // Get all text-containing block elements
-      const blocks = editorDom.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
+      // Get all text-containing block elements and the TOC container itself
+      const blocks = editorDom.querySelectorAll('p, h1, h2, h3, h4, h5, h6, .toc-container');
       if (!containerRef.current) return;
       const containerRect = containerRef.current.getBoundingClientRect();
 
       blocks.forEach(block => {
         // Skip blocks inside tables as per PDF behavior
         if (block.closest('table')) return;
+        // Number the toc-container as a single block based on height, skip its children
+        if (block.closest('.toc-container') && block !== block.closest('.toc-container')) return;
 
         // Skip empty paragraphs if they don't contain visual text, unless they take up space
         // We will just number any block that has height

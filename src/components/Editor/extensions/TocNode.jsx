@@ -6,17 +6,20 @@ const TocComponent = ({ node }) => {
 
   return (
     <NodeViewWrapper className="toc-container mb-8">
-      <h2 className="text-xl font-bold mb-4">TABLE OF CONTENTS</h2>
-      <div className="flex flex-col gap-2">
+      <h2 className="text-[14pt] font-bold m-0 leading-[22px] text-center" style={{ fontFamily: '"Times New Roman", Times, serif' }}>INDEX</h2>
+      <div className="h-[22px]"></div>
+      <div className="flex flex-col gap-0">
         {entries.map((entry, idx) => (
           <div 
             key={entry.id || idx} 
-            className="flex justify-between items-end relative"
+            className="flex items-end m-0 leading-[22px] h-[22px]"
             style={{ paddingLeft: `${(entry.level || 0) * 1.5}rem` }}
           >
-            <span className="bg-white pr-2 z-10 font-medium">{entry.title}</span>
-            <div className="absolute left-0 right-0 bottom-[6px] border-b border-dotted border-gray-400 z-0"></div>
-            <span className="bg-white pl-2 z-10">{entry.page_number}</span>
+            <span className={`pr-2 ${entry.level === 0 ? 'font-bold' : ''}`}>
+              {entry.title}
+            </span>
+            <div className="flex-1 border-b border-dotted border-black mb-[6px]"></div>
+            <span className="pl-2">{entry.page_number}</span>
           </div>
         ))}
       </div>

@@ -70,6 +70,7 @@ All blocks require an `id`, `type`, and optionally `marginBottom`, `alignment`, 
 2. **LIST:** Requires `list_type` ("bullet" | "number") and an `items` array. Items contain `spans`, `level` (for nesting), and optionally `refs`.
 3. **DIVIDER:** Simple horizontal rule (`thickness`, `color`).
 4. **TOC:** Table of contents requiring an `entries` array (`title`, `page_number`, `level`).
+5. **TABLE:** Requires a `rows` array. Each row has a `cells` array, containing `isHeader` (boolean) and `spans`. Optionally accepts `colwidth` per cell.
 
 ### Inline Text (`spans` array)
 Used inside Headings, Paragraphs, and List Items to mix bold, italic, and inline citations seamlessly.

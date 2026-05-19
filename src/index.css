@@ -83,3 +83,21 @@ html, body, #root {
 div[data-type="toc"] {
   width: 100%;
 }
+
+@media print {
+  .ProseMirror p,
+  .ProseMirror h1,
+  .ProseMirror h2,
+  .ProseMirror h3,
+  .ProseMirror h4,
+  .ProseMirror h5,
+  .ProseMirror h6,
+  .ProseMirror li,
+  .ProseMirror tr,
+  .toc-container > div > div,
+  .toc-container > p,
+  .toc-container > h2 {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -9,7 +9,7 @@ const PageNodeView = (props) => {
   const startLine = node.attrs.startLineNumber || 1;
 
   return (
-    <NodeViewWrapper className="w-[8.5in] min-h-[11in] my-8 mx-auto bg-white shadow-lg relative print:m-0 print:shadow-none flex flex-col font-serif text-[11pt] leading-[1.5]">
+    <NodeViewWrapper data-type="page" className="w-[210mm] min-h-[297mm] my-8 mx-auto bg-white shadow-lg relative print:m-0 print:shadow-none flex flex-col font-serif text-[11pt] leading-[1.5]">
       {/* Top Header */}
       <div className="text-center pt-8 text-[10pt] text-gray-700">
         Examinee: Atarah Phillips | DOL: 4/13/2023 | Evaluator: David Burns, ND, FACFN, FABBIR

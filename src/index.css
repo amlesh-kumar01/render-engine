@@ -85,6 +85,27 @@ div[data-type="toc"] {
 }
 
 @media print {
+  @page {
+    margin: 0;
+    size: A4;
+  }
+
+  /* Force page breaks after each of our custom pages */
+  div[data-type="page"] {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  div[data-type="page"]:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  html, body, #root {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .ProseMirror p,
   .ProseMirror h1,
   .ProseMirror h2,

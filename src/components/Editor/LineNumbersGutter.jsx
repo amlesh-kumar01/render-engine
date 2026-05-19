@@ -18,42 +18,45 @@ const LineNumbersGutter = ({ editor, startNumber = 1, scopedNodeId }) => {
       // If we have a scoped DOM node (the page), only query inside it
       // The parent of the containerRef is the flex container, its parent is the NodeViewWrapper.
       const pageNode = containerRef.current.closest('[data-type="page"]') || editorDom;
-      
-      // Get all text-containing block elements and the TOC container itself within THIS page
-      const blocks = pageNode.querySelectorAll('p, h1, h2, h3, h4, h5, h6, .toc-container');
+      // Get ALL text-containing block elements in the entire document
+      const allBlocks = editorDom.querySelectorAll('p, h1, h2, h3, h4, h5, h6, .toc-container');
       const containerRect = containerRef.current.getBoundingClientRect();
 
-      blocks.forEach(block => {
+      allBlocks.forEach(block => {
         // Skip blocks inside tables as per PDF behavior
         if (block.closest('table')) return;
         // Number the toc-container as a single block based on height, skip its children
         if (block.closest('.toc-container') && block !== block.closest('.toc-container')) return;
 
-        // Skip empty paragraphs if they don't contain visual text, unless they take up space
-        // We will just number any block that has height
         const blockRect = block.getBoundingClientRect();
         if (blockRect.height === 0 || block.innerText.trim() === '') return;
 
         const computedStyle = window.getComputedStyle(block);
         const lineHeightStr = computedStyle.lineHeight;
         
-        // If line-height is 'normal', approximate it. Otherwise parse it.
-        // 11pt * 1.5 = 22px
         let lineHeight = 22; 
         if (lineHeightStr !== 'normal') {
           lineHeight = parseFloat(lineHeightStr);
         }
 
-        const topRelativeToContainer = blockRect.top - containerRect.top;
         const numLines = Math.max(1, Math.round(blockRect.height / lineHeight));
 
-        // Add a line number for each visual line wrapped inside this block
-        for (let i = 0; i < numLines; i++) {
-          newLines.push({
-            number: currentNumber++,
-            top: topRelativeToContainer + (i * lineHeight),
-            height: lineHeight
-          });
+        // Check if this block belongs to the CURRENT page
+        const isCurrentPage = block.closest('[data-type="page"]') === pageNode;
+
+        if (isCurrentPage) {
+          const topRelativeToContainer = blockRect.top - containerRect.top;
+          
+          for (let i = 0; i < numLines; i++) {
+            newLines.push({
+              number: currentNumber++,
+              top: topRelativeToContainer + (i * lineHeight),
+              height: lineHeight
+            });
+          }
+        } else {
+          // Block is on a different page, just increment the global counter
+          currentNumber += numLines;
         }
       });
 

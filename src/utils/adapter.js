@@ -202,12 +202,138 @@ function convertSpansToTipTapNodes(spans) {
   return nodes;
 }
 
-// Convert TipTap JSON back to Backend format (Stub for the return path)
+// Convert TipTap JSON back to Backend format
 export function convertTipTapToBackend(tiptapJson, originalData) {
-  // Real implementation would map `tiptapJson.content` back to `blocks`
-  // keeping original IDs where possible.
-  console.log('Converting TipTap back to Backend schema...', tiptapJson);
-  
-  // Returning original for now, just to satisfy the mock API requirement
-  return { ...originalData, blocks: originalData.blocks /* TODO: reverse map */ };
+  const blocks = [];
+
+  const convertTipTapNodesToSpans = (nodes = []) => {
+    const spans = [];
+    nodes.forEach(node => {
+      if (node.type === 'text') {
+        const span = { text: node.text };
+        if (node.marks) {
+          node.marks.forEach(mark => {
+            if (mark.type === 'bold') span.bold = true;
+            if (mark.type === 'italic') span.italic = true;
+            if (mark.type === 'underline') span.underline = true;
+            if (mark.type === 'fontSize') span.fontSize = mark.attrs.size;
+          });
+        }
+        spans.push(span);
+      } else if (node.type === 'citation') {
+        // Find previous span and attach ref
+        if (spans.length > 0) {
+          const lastSpan = spans[spans.length - 1];
+          if (!lastSpan.refs) lastSpan.refs = [];
+          lastSpan.refs.push(node.attrs.refId);
+        }
+      }
+    });
+    return spans;
+  };
+
+  const processBlock = (node, level = 0) => {
+    const baseBlock = {
+      id: node.attrs?.id || `blk_${Math.random().toString(36).substr(2, 9)}`,
+      alignment: node.attrs?.textAlign || 'left',
+      marginBottom: node.attrs?.marginBottom || '16px',
+      refs: node.attrs?.blockRefs || [],
+      line_number: node.attrs?.lineNumber || null,
+    };
+
+    if (node.type === 'heading') {
+      return {
+        ...baseBlock,
+        type: 'HEADING',
+        level: String(node.attrs.level),
+        spans: convertTipTapNodesToSpans(node.content)
+      };
+    } else if (node.type === 'paragraph') {
+      return {
+        ...baseBlock,
+        type: 'PARAGRAPH',
+        spans: convertTipTapNodesToSpans(node.content)
+      };
+    } else if (node.type === 'horizontalRule') {
+      return {
+        ...baseBlock,
+        type: 'DIVIDER',
+        thickness: node.attrs?.thickness || '1px',
+        color: node.attrs?.color || '#000000'
+      };
+    } else if (node.type === 'toc') {
+      return {
+        ...baseBlock,
+        type: 'TOC',
+        entries: node.attrs?.entries || []
+      };
+    } else if (node.type === 'bulletList' || node.type === 'orderedList') {
+      const listBlock = {
+        ...baseBlock,
+        type: 'LIST',
+        list_type: node.type === 'bulletList' ? 'bullet' : 'numbered',
+        items: []
+      };
+
+      const flattenList = (listNode, currentLevel) => {
+        const items = [];
+        (listNode.content || []).forEach(listItem => {
+          const item = {
+            level: currentLevel,
+            refs: listItem.attrs?.blockRefs || [],
+            spans: []
+          };
+          
+          (listItem.content || []).forEach(child => {
+            if (child.type === 'paragraph') {
+              item.spans = convertTipTapNodesToSpans(child.content);
+            } else if (child.type === 'bulletList' || child.type === 'orderedList') {
+              items.push(...flattenList(child, currentLevel + 1));
+            }
+          });
+          items.push(item);
+        });
+        // Filter out empty items that just act as wrappers
+        return items.filter(item => item.spans.length > 0 || item.refs.length > 0);
+      };
+
+      listBlock.items = flattenList(node, level);
+      return listBlock;
+    } else if (node.type === 'table') {
+      return {
+        ...baseBlock,
+        type: 'TABLE',
+        rows: (node.content || []).map(row => ({
+          cells: (row.content || []).map(cell => ({
+            isHeader: cell.type === 'tableHeader',
+            colspan: cell.attrs?.colspan || 1,
+            rowspan: cell.attrs?.rowspan || 1,
+            colwidth: cell.attrs?.colwidth || null,
+            spans: convertTipTapNodesToSpans(cell.content?.[0]?.content || [])
+          }))
+        }))
+      };
+    }
+
+    return null;
+  };
+
+  (tiptapJson.content || []).forEach((page, pageIndex) => {
+    if (page.type === 'page') {
+      (page.content || []).forEach(node => {
+        const block = processBlock(node);
+        if (block) blocks.push(block);
+      });
+      
+      // Add PAGE_BREAK after every page except the last one
+      if (pageIndex < tiptapJson.content.length - 1) {
+        blocks.push({
+          id: `pb_${Math.random().toString(36).substr(2, 9)}`,
+          type: 'PAGE_BREAK'
+        });
+      }
+    }
+  });
+
+  return { ...originalData, blocks };
 }
